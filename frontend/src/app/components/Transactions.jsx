@@ -4,18 +4,47 @@ import { ethers } from 'ethers';
 import { ClipboardIcon, CheckIcon } from '@heroicons/react/24/outline';
 
 const CONTRACT_ADDRESS = '0x7C278C3e173be2C7fd24b7f1C445b6EAc6A63AA0';
+const ALCHEMY_API_KEY = '9bqrWyWpbTI-XQW6_OCjEePruCKsoQbh';
+const ALCHEMY_URL = `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
+
 const ABI = [
   {
-    "anonymous": false,
     "inputs": [
-      { "indexed": true, "internalType": "address", "name": "sender", "type": "address" },
-      { "indexed": true, "internalType": "address", "name": "receiver", "type": "address" },
-      { "indexed": false, "internalType": "string", "name": "message", "type": "string" },
-      { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" },
-      { "indexed": false, "internalType": "uint256", "name": "timestamp", "type": "uint256" }
+      { "internalType": "address payable", "name": "receiver", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" },
+      { "internalType": "string", "name": "message", "type": "string" }
     ],
-    "name": "Transfer",
-    "type": "event"
+    "name": "addtoBlockchain",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getTransactions",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "address", "name": "sender", "type": "address" },
+          { "internalType": "address", "name": "receiver", "type": "address" },
+          { "internalType": "string", "name": "message", "type": "string" },
+          { "internalType": "uint256", "name": "amount", "type": "uint256" },
+          { "internalType": "uint256", "name": "timestamp", "type": "uint256" }
+        ],
+        "internalType": "struct Transactions.Transaction[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getTransactionsCount",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
   }
 ];
 
@@ -30,7 +59,8 @@ export default function Transactions() {
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('');
   const [ethPrice, setEthPrice] = useState(null);
-  const [copied, setCopied] = useState(''); // store last copied value
+  const [copied, setCopied] = useState('');
+  const [totalTransactions, setTotalTransactions] = useState(0);
 
   // Fetch ETH price in INR
   useEffect(() => {
@@ -47,45 +77,56 @@ export default function Transactions() {
   }, []);
 
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchTransactions = async () => {
       try {
         setLoading(true);
         setError(null);
-        if (!window.ethereum) throw new Error('No wallet found');
-        const provider = new ethers.BrowserProvider(window.ethereum);
+        
+        console.log('Starting to fetch transactions...');
+        
+        // Create provider with a lower timeout
+        const provider = new ethers.JsonRpcProvider('https://eth-sepolia.g.alchemy.com/v2/9bqrWyWpbTI-XQW6_OCjEePruCKsoQbh', undefined, {
+          timeout: 10000 // 10 second timeout
+        });
+        console.log('Provider created');
+        
         const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
-        // Get the latest block for a reasonable range (e.g., last 10,000 blocks)
-        const latestBlock = await provider.getBlockNumber();
-        const fromBlock = Math.max(0, latestBlock - 10000);
-        const events = await contract.queryFilter('Transfer', fromBlock, latestBlock);
-        // Map events to transaction data
-        const txs = events.map(ev => ({
-          sender: ev.args.sender,
-          receiver: ev.args.receiver,
-          message: ev.args.message,
-          amount: ev.args.amount,
-          timestamp: ev.args.timestamp,
-          hash: ev.transactionHash
+        console.log('Contract instance created');
+        
+        // Get total transactions count
+        const count = await contract.getTransactionsCount();
+        setTotalTransactions(Number(count));
+        
+        // Get transactions directly from contract
+        const txs = await contract.getTransactions();
+        console.log('Transactions found:', txs.length);
+        
+        // Map transactions to our format
+        const formattedTxs = txs.map(tx => ({
+          sender: tx.sender,
+          receiver: tx.receiver,
+          message: tx.message,
+          amount: tx.amount,
+          timestamp: tx.timestamp,
+          hash: '0x' // We don't have the transaction hash in the contract
         })).reverse(); // Most recent first
-        setTransactions(txs);
+        
+        console.log('Processed transactions:', formattedTxs);
+        setTransactions(formattedTxs);
       } catch (err) {
-        setError(err.message);
+        console.error('Error in fetchTransactions:', err);
+        setError(`Failed to fetch transactions: ${err.message}`);
       } finally {
         setLoading(false);
       }
     };
-    fetchEvents();
-    // Listen for new events in real time
-    let contract;
-    let provider;
-    if (window.ethereum) {
-      provider = new ethers.BrowserProvider(window.ethereum);
-      contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
-      contract.on('Transfer', fetchEvents);
-    }
-    return () => {
-      if (contract) contract.off('Transfer', fetchEvents);
-    };
+
+    fetchTransactions();
+    
+    // Set up polling to fetch new transactions every 30 seconds
+    const interval = setInterval(fetchTransactions, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const handleCopy = async (value) => {
@@ -95,9 +136,6 @@ export default function Transactions() {
       setTimeout(() => setCopied(''), 1200);
     } catch {}
   };
-
-  // Debug: log transactions array
-  console.log('Transactions:', transactions);
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -109,8 +147,13 @@ export default function Transactions() {
               Recent Transactions
             </h2>
             <p className="text-purple-300 text-sm sm:text-base">
-              Track all your transactions in real-time
+              Track all transactions in real-time
             </p>
+            <div className="mt-4 p-4 bg-purple-900/30 rounded-xl border border-pink-400/30">
+              <p className="text-2xl font-bold text-pink-400">
+                Total Transactions: {totalTransactions}
+              </p>
+            </div>
           </div>
 
           {/* Search Section */}
