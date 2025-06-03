@@ -76,7 +76,7 @@ const Navbar = ({ account, connectWallet, disconnectWallet }) => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full px-4 sm:px-6 py-3 sm:py-4 bg-white/5 backdrop-blur-sm text-white border-b border-purple-900 shadow-md">
+    <nav className="sticky top-0 z-50 w-full px-4 sm:px-6 py-3 sm:py-4 bg-gray-900/95 backdrop-blur-md text-white border-b border-purple-900 shadow-lg">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-wide bg-gradient-to-r from-purple-300 via-pink-400 to-red-500 bg-clip-text text-transparent drop-shadow-md">
           RupETH
@@ -156,7 +156,7 @@ const Navbar = ({ account, connectWallet, disconnectWallet }) => {
                 </button>
                 {/* Dropdown */}
                 {showAccountDropdown && (
-                  <div className="absolute right-0 mt-2 w-64 bg-gray-900 border border-pink-400 rounded-xl shadow-lg z-50 p-4 animate-fade-in flex flex-col items-start">
+                  <div className="absolute right-0 mt-2 w-64 bg-gray-900/95 border border-pink-400 rounded-xl shadow-lg z-50 p-4 animate-fade-in flex flex-col items-start backdrop-blur-md">
                     <div className="flex items-center w-full mb-2">
                       <span className="font-mono text-xs text-white break-all">{account}</span>
                       <button onClick={handleCopy} className="ml-2 px-2 py-1 bg-pink-500 hover:bg-pink-600 rounded text-xs text-white transition-colors">
@@ -191,7 +191,7 @@ const Navbar = ({ account, connectWallet, disconnectWallet }) => {
       </div>
 
       {menuOpen && (
-        <div className="backdrop-blur-sm bg-white/5 fixed top-[56px] sm:top-[64px] left-0 w-full lg:hidden flex flex-col space-y-4 text-base font-semibold font-sans border-t border-purple-900 pt-4 px-4 py-3 shadow-md text-white z-40">
+        <div className="fixed top-[56px] sm:top-[64px] left-0 w-full lg:hidden flex flex-col space-y-4 text-base font-semibold font-sans border-t border-purple-900/50 pt-4 px-4 py-3 shadow-lg text-white z-40 bg-gray-900/95 backdrop-blur-md">
           {navItems.map((item, idx) => (
             item === 'Tutorial' ? (
               <button 
