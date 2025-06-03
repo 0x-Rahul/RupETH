@@ -91,11 +91,11 @@ const Navbar = ({ account, connectWallet, disconnectWallet }) => {
           >
             <div className="flex flex-col items-center">
               <span className="font-bold text-green-200 text-xs sm:text-sm tracking-wide">
-                ₹{ethPrice ? ethPrice.toLocaleString('en-IN') : '...'}
-              </span>
+              ₹{ethPrice ? ethPrice.toLocaleString('en-IN') : '...'}
+            </span>
               <span className={`text-[10px] sm:text-xs font-semibold ${ethChange && ethChange >= 0 ? 'text-green-400' : 'text-red-400'} transition-colors duration-200`}> 
-                {ethChange ? `${ethChange >= 0 ? '↑' : '↓'} ${Math.abs(ethChange).toFixed(2)}%` : ''}
-              </span>
+              {ethChange ? `${ethChange >= 0 ? '↑' : '↓'} ${Math.abs(ethChange).toFixed(2)}%` : ''}
+            </span>
             </div>
           </button>
           {/* Tooltip */}
@@ -197,37 +197,37 @@ const Navbar = ({ account, connectWallet, disconnectWallet }) => {
               <button 
                 key={idx} 
                 onClick={() => handleNavClick('tutorial')} 
-                className="w-full text-left px-4 py-3 rounded-lg bg-purple-900/30 hover:bg-purple-900/50 border border-purple-400/30 hover:border-purple-400/50 transition-all duration-200 flex items-center justify-between group text-purple-200 hover:text-white"
+                className="w-full text-left px-4 py-3 rounded-lg bg-purple-700 hover:bg-purple-600 border border-purple-500 transition-all duration-200 flex items-center justify-between group text-white hover:text-white"
               >
                 <span>{item}</span>
-                <span className="text-pink-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                <span className="text-pink-300 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
               </button>
             ) : item === 'Transactions' ? (
               <button 
                 key={idx} 
                 onClick={() => handleNavClick('transactions')} 
-                className="w-full text-left px-4 py-3 rounded-lg bg-purple-900/30 hover:bg-purple-900/50 border border-purple-400/30 hover:border-purple-400/50 transition-all duration-200 flex items-center justify-between group text-purple-200 hover:text-white"
+                className="w-full text-left px-4 py-3 rounded-lg bg-purple-700 hover:bg-purple-600 border border-purple-500 transition-all duration-200 flex items-center justify-between group text-white hover:text-white"
               >
                 <span>{item}</span>
-                <span className="text-pink-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                <span className="text-pink-300 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
               </button>
             ) : item === 'Reach Us' ? (
               <button 
                 key={idx} 
                 onClick={() => handleNavClick('contact')} 
-                className="w-full text-left px-4 py-3 rounded-lg bg-purple-900/30 hover:bg-purple-900/50 border border-purple-400/30 hover:border-purple-400/50 transition-all duration-200 flex items-center justify-between group text-purple-200 hover:text-white"
+                className="w-full text-left px-4 py-3 rounded-lg bg-purple-700 hover:bg-purple-600 border border-purple-500 transition-all duration-200 flex items-center justify-between group text-white hover:text-white"
               >
                 <span>{item}</span>
-                <span className="text-pink-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                <span className="text-pink-300 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
               </button>
             ) : (
               <button 
                 key={idx} 
                 onClick={() => handleNavClick('home')} 
-                className="w-full text-left px-4 py-3 rounded-lg bg-purple-900/30 hover:bg-purple-900/50 border border-purple-400/30 hover:border-purple-400/50 transition-all duration-200 flex items-center justify-between group text-purple-200 hover:text-white"
+                className="w-full text-left px-4 py-3 rounded-lg bg-purple-700 hover:bg-purple-600 border border-purple-500 transition-all duration-200 flex items-center justify-between group text-white hover:text-white"
               >
                 <span>{item}</span>
-                <span className="text-pink-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                <span className="text-pink-300 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
               </button>
             )
           ))}

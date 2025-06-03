@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import { ClipboardIcon, CheckIcon } from '@heroicons/react/24/outline';
 
-const CONTRACT_ADDRESS = '0xDb173A7c1906076aE496d89E7314C0558351e61e';
+const CONTRACT_ADDRESS = '0x7C278C3e173be2C7fd24b7f1C445b6EAc6A63AA0';
 const ALCHEMY_API_KEY = '9bqrWyWpbTI-XQW6_OCjEePruCKsoQbh';
 const ALCHEMY_URL = `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
 
@@ -11,11 +11,12 @@ const ABI = [
   {
     "inputs": [
       { "internalType": "address payable", "name": "receiver", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" },
       { "internalType": "string", "name": "message", "type": "string" }
     ],
-    "name": "addToBlockchain",
+    "name": "addtoBlockchain",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -44,18 +45,6 @@ const ABI = [
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      { "indexed": true, "internalType": "address", "name": "sender", "type": "address" },
-      { "indexed": true, "internalType": "address", "name": "receiver", "type": "address" },
-      { "indexed": false, "internalType": "string", "name": "message", "type": "string" },
-      { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" },
-      { "indexed": false, "internalType": "uint256", "name": "timestamp", "type": "uint256" }
-    ],
-    "name": "Transfer",
-    "type": "event"
   }
 ];
 
@@ -87,52 +76,66 @@ export default function Transactions() {
     fetchEthPrice();
   }, []);
 
-  // Fetch transactions
-  const fetchTransactions = async () => {
+  useEffect(() => {
+    const fetchEvents = async () => {
       try {
         setLoading(true);
         setError(null);
-
-      const provider = new ethers.JsonRpcProvider(ALCHEMY_URL);
+        
+        console.log('Starting to fetch transactions...');
+        
+        // Create provider
+        const provider = new ethers.JsonRpcProvider('https://eth-sepolia.g.alchemy.com/v2/9bqrWyWpbTI-XQW6_OCjEePruCKsoQbh');
+        console.log('Provider created');
+        
         const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
-      
-      // Get total transactions count
-      const txCount = await contract.getTransactionsCount();
-      setTotalTransactions(Number(txCount));
-      
-      // Get all transactions from contract storage
-      const txResults = await contract.getTransactions();
-      console.log('Raw transactions:', txResults); // Debug log
-      
-      // Format transactions
-      const formattedTxs = txResults.map(tx => ({
-        sender: tx.sender,
-        receiver: tx.receiver,
-        amount: ethers.formatEther(tx.amount),
-        message: tx.message,
-        timestamp: new Date(Number(tx.timestamp) * 1000).toLocaleString()
-      }));
+        console.log('Contract instance created');
+        
+        // Get total transactions count
+        const count = await contract.getTransactionsCount();
+        setTotalTransactions(Number(count));
+        
+        // Get transactions directly from contract
+        const txs = await contract.getTransactions();
+        console.log('Transactions found:', txs.length);
+        
+        // Get transaction hashes from event logs
+        const formattedTxs = await Promise.all(txs.map(async (tx) => {
+          try {
+            // Get the Transfer event for this transaction
+            const filter = contract.filters.Transfer(tx.sender, tx.receiver);
+            const events = await contract.queryFilter(filter);
+            const event = events.find(e => 
+              e.args.amount.toString() === tx.amount.toString() &&
+              e.args.timestamp.toString() === tx.timestamp.toString()
+            );
+            
+            return {
+              ...tx,
+              hash: event?.transactionHash || '0x'
+            };
+          } catch (error) {
+            console.error('Error getting transaction hash:', error);
+            return {
+              ...tx,
+              hash: '0x'
+            };
+          }
+        }));
 
-      console.log('Formatted transactions:', formattedTxs); 
-
-      // Sort transactions by timestamp (newest first)
-      formattedTxs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      
-      setTransactions(formattedTxs);
+        setTransactions(formattedTxs.reverse());
       } catch (err) {
-      console.error('Error fetching transactions:', err);
-      setError(`Failed to fetch transactions: ${err.message}`);
+        console.error('Error in fetchEvents:', err);
+        setError(`Failed to fetch transactions: ${err.message}`);
       } finally {
         setLoading(false);
       }
     };
 
-  // Add polling to refresh transactions
-  useEffect(() => {
-    fetchTransactions();
+    fetchEvents();
     
-    // Refresh every 10 seconds for more frequent updates
-    const interval = setInterval(fetchTransactions, 10000);
+    // Set up polling to fetch new transactions every 30 seconds
+    const interval = setInterval(fetchEvents, 30000);
     
     return () => clearInterval(interval);
   }, []);
@@ -204,9 +207,9 @@ export default function Transactions() {
                         <th scope="col" className="px-4 sm:px-6 py-4 text-left text-sm font-semibold text-pink-400 uppercase tracking-wider">Sender</th>
                         <th scope="col" className="px-4 sm:px-6 py-4 text-left text-sm font-semibold text-pink-400 uppercase tracking-wider">Receiver</th>
                         <th scope="col" className="px-4 sm:px-6 py-4 text-right text-sm font-semibold text-pink-400 uppercase tracking-wider">Amount (INR)</th>
-                        <th scope="col" className="px-4 sm:px-6 py-4 text-left text-sm font-semibold text-pink-400 uppercase tracking-wider">Message</th>
+                        <th scope="col" className="px-4 sm:px-6 py-4 text-left text-sm font-semibold text-pink-400 uppercase tracking-wider">Hash</th>
                         <th scope="col" className="px-4 sm:px-6 py-4 text-left text-sm font-semibold text-pink-400 uppercase tracking-wider">Time</th>
-                        <th scope="col" className="px-4 sm:px-6 py-4 text-center text-sm font-semibold text-pink-400 uppercase tracking-wider">View</th>
+                        <th scope="col" className="px-4 sm:px-6 py-4 text-center text-sm font-semibold text-pink-400 uppercase tracking-wider">Etherscan</th>
                       </tr>
                     </thead>
                     <tbody className="bg-purple-950/50 divide-y divide-pink-400/30">
@@ -250,27 +253,37 @@ export default function Transactions() {
                             </td>
                             <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right">
                               <span className="text-purple-200 font-mono text-sm">
-                                {ethPrice ? `₹${(Number(tx.amount) * ethPrice).toFixed(2)}` : 'Loading...'}
+                                {ethPrice ? `₹${(Number(ethers.formatEther(tx.amount)) * ethPrice).toFixed(2)}` : 'Loading...'}
                               </span>
                             </td>
                             <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <span className="text-purple-200 text-sm">
-                                {tx.message}
-                              </span>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-purple-200 font-mono text-sm">{short(tx.hash)}</span>
+                                <button
+                                  onClick={() => handleCopy(tx.hash)}
+                                  className="text-pink-400 hover:text-pink-300 transition-colors"
+                                >
+                                  {copied === tx.hash ? (
+                                    <CheckIcon className="h-4 w-4" />
+                                  ) : (
+                                    <ClipboardIcon className="h-4 w-4" />
+                                  )}
+                                </button>
+                              </div>
                             </td>
                             <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                               <span className="text-purple-200 text-sm">
-                                {tx.timestamp}
+                                {new Date(Number(tx.timestamp) * 1000).toLocaleString()}
                               </span>
                             </td>
                             <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-center">
                               <a
-                                href={`https://sepolia.etherscan.io/address/${tx.sender}`}
+                                href={`https://sepolia.etherscan.io/tx/${tx.hash}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-pink-400 hover:text-pink-300 bg-pink-400/10 hover:bg-pink-400/20 rounded-lg transition-colors duration-200"
                               >
-                                View Sender
+                                View
                               </a>
                             </td>
                           </tr>
@@ -285,4 +298,4 @@ export default function Transactions() {
       </div>
     </div>
   );
-}
+} 
