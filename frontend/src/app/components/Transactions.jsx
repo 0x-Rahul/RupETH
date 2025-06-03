@@ -77,17 +77,15 @@ export default function Transactions() {
   }, []);
 
   useEffect(() => {
-    const fetchTransactions = async () => {
+    const fetchEvents = async () => {
       try {
         setLoading(true);
         setError(null);
         
         console.log('Starting to fetch transactions...');
         
-        // Create provider with a lower timeout
-        const provider = new ethers.JsonRpcProvider('https://eth-sepolia.g.alchemy.com/v2/9bqrWyWpbTI-XQW6_OCjEePruCKsoQbh', undefined, {
-          timeout: 10000 // 10 second timeout
-        });
+        // Create provider
+        const provider = new ethers.JsonRpcProvider('https://eth-sepolia.g.alchemy.com/v2/9bqrWyWpbTI-XQW6_OCjEePruCKsoQbh');
         console.log('Provider created');
         
         const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
@@ -114,17 +112,17 @@ export default function Transactions() {
         console.log('Processed transactions:', formattedTxs);
         setTransactions(formattedTxs);
       } catch (err) {
-        console.error('Error in fetchTransactions:', err);
+        console.error('Error in fetchEvents:', err);
         setError(`Failed to fetch transactions: ${err.message}`);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTransactions();
+    fetchEvents();
     
     // Set up polling to fetch new transactions every 30 seconds
-    const interval = setInterval(fetchTransactions, 30000);
+    const interval = setInterval(fetchEvents, 30000);
     
     return () => clearInterval(interval);
   }, []);

@@ -55,10 +55,12 @@ const App = () => {
           <Tutorials />
         </div>
         <div id="transactions" className="scroll-mt-20">
-          <Transactions />
+          <Transactions account={account} />
+        </div>
+        <div id="contact" className="scroll-mt-20">
+          <Footer />
         </div>
       </div>
-      <Footer />
     </div>
   );
 };
