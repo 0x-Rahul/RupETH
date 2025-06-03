@@ -76,7 +76,7 @@ const Navbar = ({ account, connectWallet, disconnectWallet }) => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full px-4 sm:px-6 py-3 sm:py-4 bg-gray-900/95 backdrop-blur-md text-white border-b border-purple-900 shadow-lg">
+    <nav className="sticky top-0 z-50 w-full px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-gray-900 via-purple-900/30 to-gray-900 backdrop-blur-md text-white border-b border-purple-500/30 shadow-lg">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-wide bg-gradient-to-r from-purple-300 via-pink-400 to-red-500 bg-clip-text text-transparent drop-shadow-md">
           RupETH
