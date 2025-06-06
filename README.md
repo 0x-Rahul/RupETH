@@ -1,6 +1,6 @@
 # RupETH - Ethereum Transaction Platform
 
-RupETH is a modern web3 platform that enables users to send Eth by just entering in Rupees. Built with React, Next.js, and Solidity, it provides a seamless experience for managing cryptocurrency transactions.
+RupETH is a modern web3 platform that enables users to send Eth by just entering in Rupees. Built with  Next.js, TailwindCSS and Solidity, it provides a seamless experience for managing cryptocurrency transactions.
 
 ## 🌟 Features
 
@@ -14,7 +14,6 @@ RupETH is a modern web3 platform that enables users to send Eth by just entering
 ## 🛠️ Tech Stack
 
 ### Frontend
-- React.js
 - Next.js
 - Tailwind CSS
 - Heroicons
@@ -23,7 +22,6 @@ RupETH is a modern web3 platform that enables users to send Eth by just entering
 ### Smart Contract
 - Solidity
 - Foundry
-- Hardhat
 
 ## 🚀 Getting Started
 
