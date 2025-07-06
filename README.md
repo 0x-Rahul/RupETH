@@ -8,7 +8,7 @@ RupETH is a modern web3 platform that enables users to send Eth by just entering
 - **Real-time ETH Price**: Live conversion between ETH and INR
 - **Transaction History**: View and track all your transactions
 - **Interactive Tutorial**: Step-by-step guide for new users
-- **Responsive Design**: Works perfectly on both desktop and mobile devices
+- **Responsive Design**: Works perfectly on both desktop and mobile device
 - **Modern UI**: Beautiful gradient design with smooth animations
 
 ## 🛠️ Tech Stack
