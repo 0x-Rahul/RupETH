@@ -118,8 +118,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Developer**: Rahul Sah
 - **Email**: sah657033@gmail.com
-- **Twitter**: [@MintXRahul](https://x.com/MintXRahul)
-- **GitHub**: [MintXRahul](https://github.com/MintXRahul)
+- **Twitter**: [@MintXRahul](https://x.com/_0xRahul)
+- **GitHub**: [MintXRahul](https://github.com/0x-Rahul)
 - **Location**: Kolkata, West Bengal, India
 
 ## 🙏 Acknowledgments
